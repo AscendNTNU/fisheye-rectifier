@@ -4,7 +4,6 @@ import message_filters
 import cv2
 from cv_bridge import CvBridge
 import numpy as np
-import yaml
 from sensor_msgs.msg import Image
 
 camera_params = {}
@@ -31,7 +30,7 @@ def load_yaml(filepath):
 
 class Rectification(object):
     def __init__(self):
-        self.left_image_pub = rospy.Publisher("/camera/fisheye1/image_rect/", Image, queue_size=1)
+        self.left_image_pub = rospy.Publisher("/camera/fisheye1/image_rect", Image, queue_size=1)
         self.right_image_pub = rospy.Publisher("/camera/fisheye2/image_rect", Image, queue_size=1)
         self.camera_cb
         left_cam_sub = message_filters.Subscriber("/camera/fisheye1/image_raw", Image)
@@ -79,7 +78,7 @@ def main():
 
 if __name__ == '__main__':
     try:
-        load_yaml("/home/alphapilot/catkin_ws/src/fisheye_rectifier/params/t265_params.yml")
+        load_yaml("/home/nvidia/catkin_ws/src/fisheye-rectifier/params/t265_params.yml")
         main()
     except rospy.ROSInterruptException:
         pass
