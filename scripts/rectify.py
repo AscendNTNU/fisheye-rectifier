@@ -34,10 +34,11 @@ class Rectification(object):
         self.left_image_pub = rospy.Publisher("/camera/fisheye1/image_rect/", Image, queue_size=1)
         self.right_image_pub = rospy.Publisher("/camera/fisheye2/image_rect", Image, queue_size=1)
         self.camera_cb
-        left_cam_sub = message_filters.Subscriber("/camera/fisheye1/image_raw", Image)
-        right_cam_sub = message_filters.Subscriber("/camera/fisheye2/image_raw", Image)
-        ts = message_filters.TimeSynchronizer([left_cam_sub, right_cam_sub], 10)
-        ts.registerCallback(self.camera_cb)
+        left_cam_sub = rospy.Subscriber("/camera/fisheye1/image_raw", Image, self.camera_cb)
+        # left_cam_sub = message_filters.Subscriber("/camera/fisheye1/image_raw", Image)
+        # right_cam_sub = message_filters.Subscriber("/camera/fisheye2/image_raw", Image)
+        # ts = message_filters.TimeSynchronizer([left_cam_sub, right_cam_sub], 10)
+        # ts.registerCallback(self.camera_cb)
         # Create distortion maps for left and right
         image_size = (int(camera_params["width"]), int(camera_params["height"]))
         m1type = cv2.CV_16SC2
@@ -63,13 +64,13 @@ class Rectification(object):
         image_message.header = message.header
         return image_message
 
-    def camera_cb(self, img_left, img_right):
+    def camera_cb(self, img_left):
         cv_left = bridge.imgmsg_to_cv2(img_left, desired_encoding='passthrough')
-        cv_right = bridge.imgmsg_to_cv2(img_right, desired_encoding='passthrough')
+        # cv_right = bridge.imgmsg_to_cv2(img_right, desired_encoding='passthrough')
         cv_left_undistorted = cv2.remap(src=cv_left, map1=self.undistort_rectify["left"][0], map2=self.undistort_rectify["left"][1], interpolation=cv2.INTER_LINEAR)
-        cv_right_undistorted = cv2.remap(src=cv_right, map1=self.undistort_rectify["right"][0], map2=self.undistort_rectify["right"][1], interpolation=cv2.INTER_LINEAR)
+        # cv_right_undistorted = cv2.remap(src=cv_right, map1=self.undistort_rectify["right"][0], map2=self.undistort_rectify["right"][1], interpolation=cv2.INTER_LINEAR)
         self.left_image_pub.publish(self.cv_to_ros(cv_left_undistorted, img_left))
-        self.right_image_pub.publish(self.cv_to_ros(cv_right_undistorted, img_right))
+        # self.right_image_pub.publish(self.cv_to_ros(cv_right_undistorted, img_right))
 
 def main():
     rospy.init_node('rectification', anonymous=False)
